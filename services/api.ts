@@ -106,21 +106,11 @@ async function apiRequest<T>(
     };
   }
 
-  // Create abort controller for timeout
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout (Render cold starts can take time)
-  config.signal = controller.signal;
-
   try {
     const response = await fetch(url, config);
-    clearTimeout(timeoutId);
     return await handleApiResponse<T>(response);
-  } catch (error: any) {
-    clearTimeout(timeoutId);
+  } catch (error) {
     console.error('API Request failed:', error);
-    if (error.name === 'AbortError') {
-      throw new Error('Request timed out. The server might be waking up (Render Free Tier) or email service is slow. Please try again.');
-    }
     throw error;
   }
 }
